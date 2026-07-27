@@ -1,6 +1,7 @@
 Mod testing for 1.21.1 neoforge
 
 Do not expect documentation. This project exists solely for the purpose of syncing my test project between computers and sharing source code.
+This is not a production ready program, nor is it ever intended to be.
 
 All rights are reserved.
 
