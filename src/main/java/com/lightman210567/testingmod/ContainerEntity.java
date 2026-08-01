@@ -5,6 +5,9 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.Containers;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -68,8 +71,15 @@ public class ContainerEntity extends BlockEntity {
         super(CONTAINER_ENTITY.get(), pos, state);
     }
 
-    // TODO: IMPLEMENT SYNC ON THE CONTAINER ENTITY
-    // there is a bug where you will be able to insert an item to a full inventory
-    // after you have reloaded the save, due to syncing isses
-    // see https://docs.neoforged.net/docs/1.21.1/blockentities/#syncing-on-block-update
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = new CompoundTag();
+        saveAdditional(tag, registries);
+        return tag;
+    }
+
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
 }
