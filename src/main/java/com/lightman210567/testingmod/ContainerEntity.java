@@ -46,6 +46,17 @@ public class ContainerEntity extends BlockEntity {
         }
     }
 
+    public void insert(ItemStack stack, int slot) {
+        if (stack.getItem() == inventory.getStackInSlot(0).getItem()) {
+            if (inventory.getStackInSlot(slot).isEmpty()) {
+                inventory.setStackInSlot(slot, stack.copyWithCount(1));
+            } else {
+                int count = inventory.getStackInSlot(slot).getCount();
+                inventory.getStackInSlot(slot).setCount(count + 1);
+            }
+        }
+    }
+
     public void drops() {
         SimpleContainer inv = new SimpleContainer(inventory.getSlots());
         for (int i = 0; i < inventory.getSlots(); i++) {

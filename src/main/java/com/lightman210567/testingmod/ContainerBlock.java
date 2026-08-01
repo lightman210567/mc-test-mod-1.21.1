@@ -18,6 +18,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static org.apache.commons.compress.harmony.pack200.PackingUtils.log;
 
 public class ContainerBlock extends Block implements EntityBlock {
     public ContainerBlock (BlockBehaviour.Properties properties) {
@@ -33,28 +37,32 @@ public class ContainerBlock extends Block implements EntityBlock {
     public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level,
                                            BlockPos pos, Player player, InteractionHand hand,
                                            BlockHitResult hitResult) {
+        TestingMod.LOGGER.warn("INTERACTION");
         if (level.getBlockEntity(pos) instanceof ContainerEntity containerEntity) {
-            Item itemInContainer = containerEntity.inventory.getStackInSlot(0).getItem();
-            Item handItem =  stack.getItem();
-
-            if (handItem.getDescriptionId().equals(itemInContainer.getDescriptionId())) {
-                if (containerEntity.inventory.getStackInSlot(0).getCount() < ContainerEntity.STACK_SIZE) {
-                    containerEntity.inventory.insertItem(0, stack.copy(), false);
-                    stack.shrink(1);
-                    level.playSound(player, pos, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.BLOCKS, 1.0F, 1.0F);
-                }
-            } else if (!containerEntity.inventory.getStackInSlot(0).isEmpty() && !stack.isEmpty()) {
-                if (containerEntity.inventory.getStackInSlot(0).getCount() < ContainerEntity.STACK_SIZE) {
-                    containerEntity.inventory.insertItem(0, stack.copy(), false);
-                    stack.shrink(1);
-                    level.playSound(player, pos, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.BLOCKS, 1.0F, 1.0F);
-                }
-            } else {
-                ItemStack containerStack = containerEntity.inventory.extractItem(1, 1, false);
+            TestingMod.LOGGER.warn("IS CONTAINER ENTITY INSTANCE");
+            TestingMod.LOGGER.warn("CONTAINER STACK COUNT: {}", containerEntity.inventory.getStackInSlot(0).getCount());
+            if (containerEntity.inventory.getStackInSlot(0).isEmpty() && !stack.isEmpty()) {
+                TestingMod.LOGGER.warn("INSERT FIRST");
+                containerEntity.insert(stack, 0);
+                stack.shrink(1);
+                TestingMod.LOGGER.warn("NEW CONTAINER STACK COUNT AFTER INSERT: {}", containerEntity.inventory.getStackInSlot(0).getCount());
+            } else if (
+                    !containerEntity.inventory.getStackInSlot(0).isEmpty()
+                    && containerEntity.inventory.getStackInSlot(0).getCount() < ContainerEntity.STACK_SIZE
+                    && !stack.isEmpty()
+            ) {
+                TestingMod.LOGGER.warn("INSERT AGAIN");
+                containerEntity.insert(stack, 0);
+                stack.shrink(1);
+                TestingMod.LOGGER.warn("NEW CONTAINER STACK COUNT AFTER INSERT: {}", containerEntity.inventory.getStackInSlot(0).getCount());
+            } else if (stack.isEmpty() && !containerEntity.inventory.getStackInSlot(0).isEmpty()) {
+                TestingMod.LOGGER.warn("TAKE");
+                ItemStack containerStack = containerEntity.inventory.extractItem(0, 1, false);
                 player.setItemInHand(InteractionHand.MAIN_HAND, containerStack);
+                TestingMod.LOGGER.warn("NEW CONTAINER STACK COUNT AFTER TAKE: {}", containerEntity.inventory.getStackInSlot(0).getCount());
             }
         }
-    return ItemInteractionResult.SUCCESS;
+        return ItemInteractionResult.SUCCESS;
     }
 }
 //        if (level.getBlockEntity(pos) instanceof ContainerEntity containerEntity) {
